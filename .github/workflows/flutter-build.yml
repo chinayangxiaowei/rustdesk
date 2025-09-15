@@ -47,6 +47,10 @@ env:
   UPLOAD_ARTIFACT: "${{ inputs.upload-artifact }}"
   SIGN_BASE_URL: "${{ secrets.SIGN_BASE_URL }}"
 
+  RS_PUB_KEY: "${{ secrets.RS_PUB_KEY }}"
+  RENDEZVOUS_SERVER: "${{ secrets.RENDEZVOUS_SERVER }}"
+  API_SERVER: "${{ secrets.API_SERVER }}"
+
 jobs:
   generate-bridge:
     uses: ./.github/workflows/bridge.yml
@@ -91,6 +95,34 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Replace custom server address
+        run: |
+          FILES=(
+            "./libs/hbb_common/src/config.rs"
+          )
+          
+          for file in "${FILES[@]}"; do
+            if [[ -f "$file" ]]; then
+              pwd
+              echo "🔧 Replacing 'rs-ny.rustdesk.com' → '${{env.RENDEZVOUS_SERVERS}}' in: $file"
+              sed -i "s/rs-ny.rustdesk.com/${{env.RENDEZVOUS_SERVERS}}/g" "$file"
+              if ! grep -q "${{env.RENDEZVOUS_SERVERS}}" "$file"; then
+                echo "❌No server found in config.rs"
+                exit 1
+              fi
+              echo "🔧 Replacing 'OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=' → '${{env.RS_PUB_KEY}}' in: $file"
+              sed -i "s/OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=/${{env.RS_PUB_KEY}}/g" "$file"
+              if ! grep -q "${{env.RS_PUB_KEY}}" "$file"; then
+                echo "❌No pub key found in config.rs"
+                exit 1
+              fi
+            else
+              echo "❌ Required file not found: $file"
+              exit 1
+            fi
+          done
+        shell: bash
 
       - name: Restore bridge files
         uses: actions/download-artifact@master
@@ -312,6 +344,34 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Replace custom server address
+        run: |
+          FILES=(
+            "./libs/hbb_common/src/config.rs"
+          )
+          
+          for file in "${FILES[@]}"; do
+            if [[ -f "$file" ]]; then
+              pwd
+              echo "🔧 Replacing 'rs-ny.rustdesk.com' → '${{env.RENDEZVOUS_SERVERS}}' in: $file"
+              sed -i "s/rs-ny.rustdesk.com/${{env.RENDEZVOUS_SERVERS}}/g" "$file"
+              if ! grep -q "${{env.RENDEZVOUS_SERVERS}}" "$file"; then
+                echo "❌No server found in config.rs"
+                exit 1
+              fi
+              echo "🔧 Replacing 'OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=' → '${{env.RS_PUB_KEY}}' in: $file"
+              sed -i "s/OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=/${{env.RS_PUB_KEY}}/g" "$file"
+              if ! grep -q "${{env.RS_PUB_KEY}}" "$file"; then
+                echo "❌No pub key found in config.rs"
+                exit 1
+              fi
+            else
+              echo "❌ Required file not found: $file"
+              exit 1
+            fi
+          done
+        shell: bash
 
       - name: Install LLVM and Clang
         uses: rustdesk-org/install-llvm-action-32bit@master
@@ -580,6 +640,34 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+
+      - name: Replace custom server address
+        run: |
+          FILES=(
+            "./libs/hbb_common/src/config.rs"
+          )
+          
+          for file in "${FILES[@]}"; do
+            if [[ -f "$file" ]]; then
+              pwd
+              echo "🔧 Replacing 'rs-ny.rustdesk.com' → '${{env.RENDEZVOUS_SERVERS}}' in: $file"
+              sed -i "" "s/rs-ny.rustdesk.com/${{env.RENDEZVOUS_SERVERS}}/g" "$file"
+              if ! grep -q "${{env.RENDEZVOUS_SERVERS}}" "$file"; then
+                echo "❌No server found in config.rs"
+                exit 1
+              fi
+              echo "🔧 Replacing 'OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=' → '${{env.RS_PUB_KEY}}' in: $file"
+              sed -i "" "s/OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=/${{env.RS_PUB_KEY}}/g" "$file"
+              if ! grep -q "${{env.RS_PUB_KEY}}" "$file"; then
+                echo "❌No pub key found in config.rs"
+                exit 1
+              fi
+            else
+              echo "❌ Required file not found: $file"
+              exit 1
+            fi
+          done
+        shell: bash
 
       - name: Import the codesign cert
         if: env.MACOS_P12_BASE64 != null
